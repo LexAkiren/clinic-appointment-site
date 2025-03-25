@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /appointments/{appointmentId} {
+      
+      // Allow reading if the user owns the appointment
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // Allow creating only if the user is setting their own UID
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // Allow updates only if:
+      // - The user is authenticated
+      // - The user owns the appointment
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      // Deny deletes unless you add support
+      allow delete: if false;
+    }
+  }
+}
