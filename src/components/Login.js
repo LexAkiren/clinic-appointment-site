@@ -1,3 +1,4 @@
+// src/components/Login.js
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase-config';
@@ -15,22 +16,36 @@ export default function Login() {
       navigate('/');
     } catch (err) {
       console.error(err);
-      setError("Login failed. Check your credentials.");
+      setError('Login failed. Please check your credentials.');
     }
   };
 
   return (
-    <div>
-      <h2>Doctor Login</h2>
-      {error && <p className="text-danger">{error}</p>}
-      <input type="email" className="form-control mb-2" placeholder="Email"
-        value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input type="password" className="form-control mb-2" placeholder="Password"
-        value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button className="btn btn-primary" onClick={login}>Login</button>
-      <p className="mt-2">
-        Don't have an account? <a href="/register">Register here</a>
-      </p>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2>Doctor Login</h2>
+        {error && <p className="text-danger mb-3">{error}</p>}
+        
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="form-input"
+        />
+        
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="form-input"
+        />
+
+        <button className="auth-btn mt-2" onClick={login}>Login</button>
+
+        <a href="/register" className="auth-link">Don't have an account? Register here</a>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+// src/components/DoctorSetup.js
+import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebase-config';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 export default function DoctorSetup() {
@@ -10,37 +11,73 @@ export default function DoctorSetup() {
     contact: '',
     bio: ''
   });
-
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
+  const user = auth.currentUser;
 
-    try {
-      await setDoc(doc(db, 'doctors', user.uid), {
-        ...form,
-        userId: user.uid,
-        email: user.email
-      });
-      navigate('/');
-    } catch (err) {
-      console.error("Failed to save profile:", err.message);
-    }
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      const profileRef = doc(db, 'doctors', user.uid);
+      const profileSnap = await getDoc(profileRef);
+      if (profileSnap.exists()) {
+        setForm(profileSnap.data());
+      }
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  const handleSave = async () => {
+    const profileRef = doc(db, 'doctors', user.uid);
+    await setDoc(profileRef, {
+      ...form,
+      userId: user.uid
+    });
+    navigate('/'); // Go to dashboard after saving
   };
 
+  if (loading) return <div className="auth-container"><p>Loading...</p></div>;
+
   return (
-    <div>
-      <h2>Set Up Your Profile</h2>
-      <input className="form-control mb-2" placeholder="Full Name" value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })} />
-      <input className="form-control mb-2" placeholder="Specialization" value={form.specialization}
-        onChange={(e) => setForm({ ...form, specialization: e.target.value })} />
-      <input className="form-control mb-2" placeholder="Contact Info" value={form.contact}
-        onChange={(e) => setForm({ ...form, contact: e.target.value })} />
-      <textarea className="form-control mb-2" placeholder="Bio / Notes" value={form.bio}
-        onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-      <button className="btn btn-primary" onClick={handleSubmit}>Save Profile</button>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2>Complete Your Profile</h2>
+
+        <input
+          type="text"
+          placeholder="Full Name"
+          className="form-input"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Specialization"
+          className="form-input"
+          value={form.specialization}
+          onChange={(e) => setForm({ ...form, specialization: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Contact Number"
+          className="form-input"
+          value={form.contact}
+          onChange={(e) => setForm({ ...form, contact: e.target.value })}
+        />
+        <textarea
+          placeholder="Short Bio"
+          className="form-input"
+          rows={3}
+          value={form.bio}
+          onChange={(e) => setForm({ ...form, bio: e.target.value })}
+        />
+
+        <button className="auth-btn mt-2" onClick={handleSave}>Save Profile</button>
+        <a href="/" className="auth-link">Skip for now</a>
+      </div>
     </div>
   );
 }

@@ -7,13 +7,15 @@ import Login from './components/Login';
 import Register from './components/Register';
 import DoctorSetup from './components/DoctorSetup';
 import Dashboard from './components/Dashboard';
-import './App.css'; 
+import Layout from './components/Layout';
+import PastRecords from './components/PastRecords';
+import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading, please wait...');
-  const [isDarkMode, setIsDarkMode] = useState(false); // For night mode toggle
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -27,23 +29,35 @@ function App() {
   if (!authChecked) return <div className="loading-screen">{loadingMessage}</div>;
 
   const toggleTheme = () => {
-    setIsDarkMode(prevMode => !prevMode); // Toggle dark mode
+    setIsDarkMode(prevMode => !prevMode);
   };
 
   return (
     <Router>
       <div className={`App ${isDarkMode ? 'dark-mode' : ''}`}>
-        <div className="App-header">
-          <button className="theme-toggle-btn" onClick={toggleTheme}>
-            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-          </button>
-          <Routes>
-            <Route path="/" element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} />
-            <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-            <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
-            <Route path="/setup" element={user ? <DoctorSetup /> : <Navigate to="/login" />} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              user ? (
+                <Layout
+                  user={user}
+                  toggleTheme={toggleTheme}
+                  isDarkMode={isDarkMode}
+                />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          >
+            <Route index element={<Dashboard user={user} />} />
+            <Route path="setup" element={<DoctorSetup />} />
+            <Route path="records" element={<PastRecords user={user} />} />
+          </Route>
+
+          <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+          <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+        </Routes>
       </div>
     </Router>
   );

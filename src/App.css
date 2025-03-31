@@ -1,43 +1,67 @@
-/* Global Styles */
+/* GLOBAL RESET */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* BASE THEME */
 body {
   font-family: 'Arial', sans-serif;
   background-color: #f4f7fa;
   color: #333;
 }
 
+/* ====================
+   LAYOUT STRUCTURE
+==================== */
 .App {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
   transition: background-color 0.3s ease;
 }
 
-.App-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+.sidebar {
+  min-height: 100vh;
+  background-color: #1e1e1e;
   padding: 20px;
-  width: 100%;
-  max-width: 1200px;
+  color: white;
 }
 
+.sidebar a {
+  color: white;
+  margin-bottom: 10px;
+  text-decoration: none;
+  display: block;
+}
+
+.sidebar a:hover {
+  text-decoration: underline;
+}
+
+.main-content {
+  background-color: #f4f7fa;
+  padding: 30px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+/* THEME TOGGLE */
 .theme-toggle-btn {
-  padding: 10px 20px;
-  margin-bottom: 20px;
+  padding: 8px 16px;
+  margin-bottom: 10px;
   background-color: #00796b;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   transition: background-color 0.3s ease;
 }
 
@@ -45,23 +69,19 @@ body {
   background-color: #004d40;
 }
 
-/* Night Mode Styles */
+/* DARK MODE OVERRIDES */
 .dark-mode {
   background-color: #121212;
   color: #ffffff;
 }
 
-.dark-mode .theme-toggle-btn {
-  background-color: #00796b;
+.dark-mode .main-content {
+  background-color: #1e1e1e;
 }
 
 .dark-mode .card {
   background-color: #2c2c2c;
   border: 1px solid #444;
-}
-
-.dark-mode .card-header {
-  color: #ffffff;
 }
 
 .dark-mode .form-label,
@@ -82,26 +102,24 @@ body {
   color: #61dafb;
 }
 
-/* Card-like Design for Login, Register, and DoctorSetup */
+/* ====================
+   REUSABLE STYLES
+==================== */
+
+/* CARD */
 .card {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  width: 100%;
-  max-width: 400px;
-  margin: 20px;
-  text-align: center;
+  padding: 25px;
+  margin-bottom: 20px;
 }
 
-.card-header {
-  font-size: 24px;
-  color: #00796b;
-  margin-bottom: 20px;
+.card h5 {
   font-weight: bold;
 }
 
-/* Form Inputs */
+/* FORMS */
 .form-group {
   margin-bottom: 20px;
 }
@@ -112,57 +130,154 @@ body {
   margin-bottom: 5px;
 }
 
-.form-input {
+.form-input,
+textarea,
+select,
+input {
   width: 100%;
   padding: 12px;
   margin-top: 5px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  font-size: 15px;
+}
+
+/* BUTTONS */
+.card-button,
+.btn-success,
+.btn-primary {
+  padding: 12px;
+  background-color: #00796b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.card-button:hover,
+.btn-success:hover,
+.btn-primary:hover {
+  background-color: #004d40;
+  transform: scale(1.03);
+}
+
+/* ============================
+   LOGIN / REGISTER / SETUP
+============================ */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f4f7fa;
+}
+
+.auth-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 40px 30px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.auth-card h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #00796b;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 18px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   font-size: 16px;
 }
 
-.card-button {
+.auth-btn {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background-color: #00796b;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 18px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: background-color 0.3s ease;
 }
 
-.card-button:hover {
+.auth-btn:hover {
   background-color: #004d40;
-  transform: scale(1.05);
 }
 
-/* App Links */
-.App-link {
+.auth-link {
+  margin-top: 15px;
+  display: inline-block;
+  font-size: 15px;
   color: #00796b;
   text-decoration: none;
-  font-weight: bold;
-  margin-top: 20px;
-  font-size: 18px;
+  font-weight: 500;
 }
 
-.App-link:hover {
+.auth-link:hover {
   color: #004d40;
+  text-decoration: underline;
 }
 
-/* Media Query for Mobile */
+.dark-mode .auth-container {
+  background-color: #121212;
+}
+
+.dark-mode .auth-card {
+  background-color: #1e1e1e;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .auth-card h2 {
+  color: #00c3a5;
+}
+
+.dark-mode .auth-card input {
+  background-color: #2c2c2c;
+  color: #f8f8f8;
+  border-color: #555;
+}
+
+.dark-mode .auth-link {
+  color: #61dafb;
+}
+
+/* ====================
+   RESPONSIVE
+==================== */
 @media (max-width: 768px) {
-  .card {
-    max-width: 90%;
+  .sidebar {
+    min-height: auto;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .main-content {
     padding: 15px;
   }
 
-  .card-header {
-    font-size: 22px;
+  .card {
+    padding: 20px;
   }
 
-  .card-button {
-    font-size: 16px;
+  .header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .theme-toggle-btn {
+    width: 100%;
   }
 }

@@ -9,17 +9,18 @@ import {
   where,
   updateDoc,
   doc,
-  getDoc
+  getDoc,
+  deleteDoc
 } from 'firebase/firestore';
 
 export default function Dashboard({ user }) {
   const [appointments, setAppointments] = useState([]);
-  const [form, setForm] = useState({ name: '', date: '', notes: '', status: 'pending' });
+  const [form, setForm] = useState({ name: '', date: '' });
   const [profile, setProfile] = useState(null);
+  const [openId, setOpenId] = useState(null);
 
   const appointmentRef = collection(db, 'appointments');
 
-  // Load doctor's profile
   useEffect(() => {
     const fetchProfile = async () => {
       const profileDoc = await getDoc(doc(db, 'doctors', user.uid));
@@ -30,7 +31,6 @@ export default function Dashboard({ user }) {
     fetchProfile();
   }, [user.uid]);
 
-  // Listen for appointment changes
   useEffect(() => {
     const q = query(appointmentRef, where('userId', '==', user.uid));
     const unsub = onSnapshot(q, (snapshot) => {
@@ -44,19 +44,33 @@ export default function Dashboard({ user }) {
     if (!form.name || !form.date) return;
     await addDoc(appointmentRef, {
       ...form,
-      userId: user.uid
+      userId: user.uid,
+      status: 'pending'
     });
-    setForm({ name: '', date: '', notes: '', status: 'pending' });
+    setForm({ name: '', date: '' });
   };
 
-  const updateStatus = async (id, newStatus) => {
+  const updateAppointment = async (id, field, value) => {
     const docRef = doc(db, 'appointments', id);
-    await updateDoc(docRef, { status: newStatus });
+    await updateDoc(docRef, { [field]: value });
   };
 
-  const updateNotes = async (id, notes) => {
-    const docRef = doc(db, 'appointments', id);
-    await updateDoc(docRef, { notes });
+  const handleStart = async (appt) => {
+    setOpenId(appt.id);
+    if (appt.status !== 'on-going') {
+      await updateAppointment(appt.id, 'status', 'on-going');
+    }
+  };
+
+  const handleDone = async (id) => {
+    await updateAppointment(id, 'status', 'done');
+    setOpenId(null);
+  };
+
+  const deleteAppointment = async (id) => {
+    if (window.confirm("Are you sure you want to delete this appointment?")) {
+      await deleteDoc(doc(db, 'appointments', id));
+    }
   };
 
   return (
@@ -66,7 +80,6 @@ export default function Dashboard({ user }) {
         <button className="btn btn-danger" onClick={() => signOut(auth)}>Log Out</button>
       </div>
 
-      {/* Doctor Profile Info */}
       {profile && (
         <div className="alert alert-info">
           <h5>Dr. {profile.name}</h5>
@@ -76,7 +89,7 @@ export default function Dashboard({ user }) {
         </div>
       )}
 
-      {/* New Appointment Form */}
+      {/* Create Appointment */}
       <h4 className="mt-4">Add New Appointment</h4>
       <input
         className="form-control mb-2"
@@ -90,37 +103,57 @@ export default function Dashboard({ user }) {
         value={form.date}
         onChange={(e) => setForm({ ...form, date: e.target.value })}
       />
-      <textarea
-        className="form-control mb-2"
-        placeholder="Initial Notes"
-        value={form.notes}
-        onChange={(e) => setForm({ ...form, notes: e.target.value })}
-      />
       <button className="btn btn-success mb-4" onClick={createAppointment}>
         Save Appointment
       </button>
 
-      {/* Appointments List */}
-      <h4>Appointments</h4>
-      {appointments.map((appt) => (
+      {/* Upcoming & Active */}
+      <h4>Upcoming & Active Appointments</h4>
+      {appointments.filter(a => a.status !== 'done').map((appt) => (
         <div key={appt.id} className="card mb-3">
           <div className="card-body">
             <h5>{appt.name} — {appt.date}</h5>
             <p>Status: <strong>{appt.status}</strong></p>
-            <select
-              className="form-select mb-2"
-              value={appt.status}
-              onChange={(e) => updateStatus(appt.id, e.target.value)}
-            >
-              <option value="pending">Pending</option>
-              <option value="on-going">On-going</option>
-              <option value="done">Done</option>
-            </select>
-            <textarea
-              className="form-control"
-              value={appt.notes}
-              onChange={(e) => updateNotes(appt.id, e.target.value)}
-            />
+
+            {openId === appt.id ? (
+              <>
+                <textarea
+                  className="form-control mb-2"
+                  placeholder="Diagnosis"
+                  value={appt.diagnosis || ''}
+                  onChange={(e) => updateAppointment(appt.id, 'diagnosis', e.target.value)}
+                />
+                <textarea
+                  className="form-control mb-2"
+                  placeholder="Treatment Plan"
+                  value={appt.treatment || ''}
+                  onChange={(e) => updateAppointment(appt.id, 'treatment', e.target.value)}
+                />
+                <textarea
+                  className="form-control mb-2"
+                  placeholder="Prescription"
+                  value={appt.prescription || ''}
+                  onChange={(e) => updateAppointment(appt.id, 'prescription', e.target.value)}
+                />
+                <div className="d-flex gap-2">
+                  <button className="btn btn-outline-secondary" onClick={() => setOpenId(null)}>
+                    Close
+                  </button>
+                  <button className="btn btn-success" onClick={() => handleDone(appt.id)}>
+                    ✅ Mark as Done
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <button className="btn btn-primary me-2" onClick={() => handleStart(appt)}>
+                  Start Appointment
+                </button>
+                <button className="btn btn-outline-danger btn-sm mt-2" onClick={() => deleteAppointment(appt.id)}>
+                  🗑 Delete
+                </button>
+              </>
+            )}
           </div>
         </div>
       ))}
